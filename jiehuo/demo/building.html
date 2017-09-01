@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wonder.js webgl engine</title>
+
+    <script src="./engine/wd.all.innerLib.js" type="text/javascript"></script>
+    <script src="./engine/wd.all.debug.js" type="text/javascript"></script>
+</head>
+<body>
+<script>
+    var fontData = {
+        color: "red",
+        size: 40,
+        width:400,
+        height:200
+    }
+    /*!
+     此处填写每层楼的数据(info字段)
+
+     如果info的字体个数超过25个，请对应扩大fontData.width或者fontData/height
+     */
+    var buildingInfoData = {
+        "总部办公楼":{
+            1: {
+                info: "介介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍",
+                color: "rgb(205, 250, 122)"
+            },
+            2: {
+                info: "info1",
+                color: "rgb(205, 250, 122)"
+            },
+            3: {
+                info: "info1",
+                color: "rgb(205, 250, 122)"
+            },
+            4: {
+                info: "info1",
+                color: "rgb(205, 250, 122)"
+            },
+            5: {
+                info: "info1",
+                color: "rgb(205, 250, 122)"
+            },
+            6: {
+                info: "info1",
+                color: "rgb(205, 250, 122)"
+            },
+            7: {
+                info: "info1",
+                color: "rgb(205, 250, 122)"
+            }
+        },
+        "产业办公楼A":{
+            1: {
+                info: "A",
+                color: "rgb(249, 179, 120)"
+            },
+            2: {
+                info: "info1",
+                color: "rgb(249, 179, 120)"
+            },
+            3: {
+                info: "info1",
+                color: "rgb(249, 179, 120)"
+            },
+            4: {
+                info: "info1",
+                color: "rgb(249, 179, 120)"
+            },
+            5: {
+                info: "info1",
+                color: "rgb(249, 179, 120)"
+            },
+            6: {
+                info: "info1",
+                color: "rgb(249, 179, 120)"
+            }
+        },
+        "产业办公楼B":{
+            1: {
+                info: "B",
+                color: "rgb(249, 225, 120)"
+            },
+            2: {
+                info: "info1",
+                color: "rgb(249, 225, 120)"
+            },
+            3: {
+                info: "info1",
+                color: "rgb(249, 225, 120)"
+            },
+            4: {
+                info: "info1",
+                color: "rgb(249, 225, 120)"
+            },
+            5: {
+                info: "info1",
+                color: "rgb(249, 225, 120)"
+            },
+            6: {
+                info: "info1",
+                color: "rgb(249, 225, 120)"
+            }
+        },
+        "产业办公楼C":{
+            1: {
+                info: "C",
+                color: "rgb(120, 249, 193)"
+            },
+            2: {
+                info: "info1",
+                color: "rgb(120, 249, 193)"
+            },
+            3: {
+                info: "info1",
+                color: "rgb(120, 249, 193)"
+            },
+            4: {
+                info: "info1",
+                color: "rgb(120, 249, 193)"
+            },
+            5: {
+                info: "info1",
+                color: "rgb(120, 249, 193)"
+            },
+            6: {
+                info: "info1",
+                color: "rgb(120, 249, 193)"
+            }
+        },
+        "公寓A":{
+            1: {
+                info: "A",
+                color: "rgb(82, 98, 209)"
+            },
+            2: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            },
+            3: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            },
+            4: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            },
+            5: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            },
+            6: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            }
+        },
+        "公寓B":{
+            1: {
+                info: "B",
+                color: "rgb(82, 98, 209)"
+            },
+            2: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            },
+            3: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            },
+            4: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            },
+            5: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            },
+            6: {
+                info: "info1",
+                color: "rgb(82, 98, 209)"
+            }
+        },
+        "孵化中心":{
+            1: {
+                info: "info1",
+                color: "rgb(120, 249, 245)"
+            },
+            2: {
+                info: "info1",
+                color: "rgb(120, 249, 245)"
+            },
+            3: {
+                info: "info1",
+                color: "rgb(120, 249, 245)"
+            },
+            4: {
+                info: "info1",
+                color: "rgb(120, 249, 245)"
+            },
+            5: {
+                info: "info1",
+                color: "rgb(120, 249, 245)"
+            },
+            6: {
+                info: "info1",
+                color: "rgb(120, 249, 245)"
+            }
+        },
+        "餐饮":{
+            info: "info1",
+            color: "rgb(213, 112, 122)"
+        }
+    }
+
+
+    window.onload = function () {
+        wd.Main.setConfig({
+            isTest: false,
+            screenSize: wd.EScreenSize.FULL
+        }).init();
+
+        wd.LoaderManager.getInstance().load([
+            {url: "./0419.wd", id: "model"},
+            {type:wd.EAssetType.SCRIPT, url: "./js/scene.js", id: "sceneScript"},
+            {type:wd.EAssetType.SCRIPT, url: "./js/rayPicking.js", id: "rayPicking"},
+            {type: wd.EAssetType.FONT, url: "./Urdeutsch.ttf", id: "Urdeutsch"}
+        ]).subscribe(null, null, function () {
+            initSample();
+        });
+
+        function getBuildingData(gameObject) {
+            var name = gameObject.name,
+                floor = null,
+                table = window.buildingInfoData,
+                data = null;
+
+            if(name.indexOf("Group15 Group6") > -1){
+                if(name.indexOf("Mesh13") > -1){
+                    floor = 1;
+                }
+                else if(name.indexOf("Mesh14") > -1){
+                    floor = 2;
+                }
+                else{
+                    floor = Number(name.match(/Mesh(\d+)/)[1]) - 18;
+                }
+
+                data = table["产业办公楼A"][floor];
+            }
+            else if(name.indexOf("Group62 Group6") > -1){
+                floor = Number(name.match(/Mesh(\d+)/)[1]) - 57;
+
+                data = table["产业办公楼B"][floor];
+            }
+            else if(name.indexOf("Group28 Group6") > -1){
+                floor = Number(name.match(/Mesh(\d+)/)[1]) - 25;
+
+                data = table["产业办公楼C"][floor];
+            }
+            else if(name.indexOf("Group7 Group6") > -1){
+                floor = Number(name.match(/Mesh(\d+)/)[1]) - 5;
+
+                data = table["总部办公楼"][floor];
+            }
+            else if(name.indexOf("Mesh1 Group1 Model") > -1){
+                data = table["公寓A"]["1"];
+            }
+            else if(name.indexOf("Mesh2 Group2 Model") > -1){
+                data = table["公寓A"]["2"];
+            }
+            else if(name.indexOf("Mesh3 Group3 Model") > -1){
+                data = table["公寓A"]["3"];
+            }
+            else if(name.indexOf("Mesh4 Group4 Model") > -1){
+                data = table["公寓A"]["4"];
+            }
+            else if(name.indexOf("Mesh5 Group5 Model") > -1){
+                data = table["公寓A"]["5"];
+            }
+            else if(name.indexOf("Mesh80 Group86 Group6 Model") > -1){
+                data = table["公寓A"]["6"];
+            }
+            else if(name.indexOf("Mesh74 Group80 Group6 Model") > -1){
+                data = table["公寓B"]["1"];
+            }
+            else if(name.indexOf("Mesh75 Group81 Group6 Model") > -1){
+                data = table["公寓B"]["2"];
+            }
+            else if(name.indexOf("Mesh76 Group82 Group6 Model") > -1){
+                data = table["公寓B"]["3"];
+            }
+            else if(name.indexOf("Mesh77 Group83 Group6 Model") > -1){
+                data = table["公寓B"]["4"];
+            }
+            else if(name.indexOf("Mesh78 Group84 Group6 Model") > -1){
+                data = table["公寓B"]["5"];
+            }
+            else if(name.indexOf("Mesh79 Group85 Group6 Model") > -1){
+                data = table["公寓B"]["6"];
+            }
+            else if(name.indexOf("Group73 Group6") > -1){
+                floor = Number(name.match(/Mesh(\d+)/)[1]) - 67;
+
+                data = table["孵化中心"][floor];
+            }
+            else if(name.indexOf("Mesh92 Group94 Model") > -1
+                || name.indexOf("Mesh91") > -1){
+
+                data = table["餐饮"];
+            }
+
+            return data;
+        }
+
+        function initSample() {
+            var director = wd.Director.getInstance();
+
+//            wd.DebugConfig.debugCollision = true;
+
+            director.domEventManager.filterTriggerGameObjectLists = filterTriggerGameObjectLists;
+
+            director.scene.addChild(setModel());
+            director.scene.addChild(createAmbientLight());
+            director.scene.addChild(createDirectionLight());
+            director.scene.addChild(createCamera());
+
+            director.scene.addChild(createFont("This is a BitmapFont example!"));
+
+
+            director.scene.addComponent(wd.Script.create("sceneScript"));
+
+            director.start();
+        }
+
+        function filterTriggerGameObjectLists(gameObjectList) {
+            return gameObjectList.filter(function(gameObject){
+                return isBuilding(gameObject);
+            }).sort(function(a, b){
+                return getHeight(b) - getHeight(a);
+            }).getChild(0);
+        }
+
+        function isBuilding(gameObject) {
+            return gameObject.data !== null;
+        }
+
+        function getHeight(gameObject) {
+            /*!
+             here each gameObject->transform.position === 0,0,0
+             so need judge the vertices!
+             */
+            var geometry = gameObject.getComponent(wd.Geometry),
+                vertices = geometry.geometryData.vertices,
+                height = -Infinity;
+
+            for(var i = 0, len = vertices.length; i < len; i+=3){
+                height = Math.max(vertices[i + 1], height);
+            }
+
+            return height;
+        }
+
+        function createFont(info){
+            var font = wd.PlainFont.create();
+
+//            font.text = fontData.initText;
+            //should be the font asset id
+//            font.fontFamily = "Urdeutsch";
+            font.fontSize = fontData.size;
+            font.enableFill(fontData.color);
+            font.xAlignment = wd.EFontXAlignment.LEFT;
+            font.yAlignment = wd.EFontYAlignment.TOP;
+
+
+            var uiObject = wd.UIObject.create();
+
+            uiObject.addComponent(font);
+
+            uiObject.transform.width = fontData.width;
+            uiObject.transform.height = fontData.height;
+
+
+
+            var renderer = wd.UIRenderer.create();
+
+            renderer.setCanvas(null, null, fontData.width, fontData.height);
+
+            uiObject.addComponent(renderer);
+
+
+            uiObject.transform.translate(fontData.width/2, fontData.height /2);
+
+
+            uiObject.name = "font";
+
+            return uiObject;
+        }
+
+        function setModel() {
+            var model = wd.LoaderManager.getInstance().get("model").getChild("models").getChild(0);
+
+            model.forEach(function(gameObject, index){
+                var data = getBuildingData(gameObject);
+
+                gameObject.data = data;
+
+                if(data){
+                    gameObject.name = data.info;
+                }
+
+                if(isBuilding(gameObject)){
+                    var eventTriggerDetector = wd.RayCasterEventTriggerDetector.create();
+
+                    gameObject.addComponent(wd.BoxCollider.create());
+
+                    gameObject.addComponent(eventTriggerDetector);
+
+                    gameObject.addComponent(wd.Script.create("rayPicking"));
+                }
+            })
+
+            return model;
+        }
+
+        function createAmbientLight() {
+            var ambientLightComponent = wd.AmbientLight.create();
+            ambientLightComponent.color = wd.Color.create("rgb(30, 30, 30)");
+
+            var ambientLight = wd.GameObject.create();
+            ambientLight.addComponent(ambientLightComponent);
+
+            return ambientLight;
+        }
+
+        function createDirectionLight() {
+            var directionLightComponent = wd.DirectionLight.create();
+            directionLightComponent.color = wd.Color.create("#ffffff");
+            directionLightComponent.intensity = 1;
+
+            var directionLight = wd.GameObject.create();
+            directionLight.addComponent(directionLightComponent);
+
+            directionLight.transform.translate(wd.Vector3.create(0, 100, 50));
+
+            return directionLight;
+        }
+
+        function createCamera() {
+            var camera = wd.GameObject.create(),
+                view = wd.Director.getInstance().view,
+                cameraComponent = wd.PerspectiveCamera.create();
+
+            cameraComponent.fovy = 60;
+            cameraComponent.aspect = view.width / view.height;
+            cameraComponent.near = 0.1;
+            cameraComponent.far = 10000;
+
+            var controller = wd.ArcballCameraController.create(cameraComponent);
+            controller.distance = 1000;
+
+            controller.theta = Math.PI / 3;
+
+            camera.addComponent(controller);
+
+            return camera;
+        }
+    };
+</script>
+</body>
+</html>
+

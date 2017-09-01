@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<meta charset="utf-8">
+    <title>Example 08.06 - Load OBJ model </title>
+    <script type="text/javascript" src="libs/three.js"></script>
+    <script type="text/javascript" src="libs/OBJLoader.js"></script>
+    <script type="text/javascript" src="libs/MTLLoader.js"></script>  
+    <script type="text/javascript" src="libs/OBJMTLLoader.js"></script>
+    <script type="text/javascript" src="libs/stats.js"></script>
+    <script type="text/javascript" src="libs/dat.gui.js"></script>
+    <script type="text/javascript" src="libs/OrbitControls.js"></script>
+
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div id="Stats-output">
+</div>
+<!-- Div which will hold the Output -->
+<div id="WebGL-output">
+</div>
+
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+    // once everything is loaded, we run our Three.js stuff.
+    function init() {
+        var stats = initStats();
+        // 创建一个场景，它将容纳我们所有的元素，如物体、照相机和灯光。
+        var scene = new THREE.Scene();
+        // 创建一个摄像头，它定义我们在哪里看。
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // 创建一个渲染并设置大小
+        var webGLRenderer = new THREE.WebGLRenderer();
+        webGLRenderer.setClearColor(new THREE.Color(0xffffff, 1.0));
+        webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+        webGLRenderer.shadowMapEnabled = true;
+        // 将摄像机定位并指向场景中心
+        camera.position.x = 130;
+        camera.position.y = 140;
+        camera.position.z = 150;
+        camera.lookAt(scene.position);
+        scene.add(camera);
+
+
+
+        var orbitControls = new THREE.OrbitControls(camera);
+        orbitControls.autoRotate = false;
+        var clock = new THREE.Clock();
+        // 添加聚光灯的阴影
+        var ambientLight = new THREE.AmbientLight( 0xffffff );
+        scene.add( ambientLight );
+        var directionalLight = new THREE.DirectionalLight( 0xffffff );
+        directionalLight.position.set( 0, 1, -1 ).normalize();
+        scene.add( directionalLight );
+
+
+
+//        // create the ground plane
+//        var planeGeometry = new THREE.PlaneGeometry(200, 250);
+//        var planeMaterial = new THREE.MeshBasicMaterial({color: 0xc6c5c5});
+//        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+//
+//
+//        // rotate and position the plane
+//        plane.rotation.x = -0.5 * Math.PI;
+//        plane.position.x = 15;
+//        plane.position.y = 0;
+//        plane.position.z = 0;
+
+
+        // add the plane to the scene
+//        scene.add(plane);
+
+        // 添加的渲染输出到HTML元素
+        document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
+        // 调用渲染函数
+        var step = 0;
+        // 设置控件GUI
+        var controls = new function () {
+            // we need the first child, since it's a multimaterial
+        };
+        var gui = new dat.GUI();
+        
+
+        function onDocumentMouseMove(event) {
+                event.preventDefault();
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            }
+         
+        /*  加载OBJLoader*/
+        var mesh;
+        var loader = new THREE.OBJMTLLoader();
+//        loader.load('obj/0419.obj', 'obj/0419.mtl', function (object) {
+//            loader.load('obj/guangchang.obj', 'obj/guangchang.mtl', function (object) {
+                loader.load('obj/untitled.obj', 'obj/untitled.mtl', function (object) {
+            console.log(object);
+            object.traverse(function(child){
+                if(child instanceof THREE.Mesh)
+                {
+                    console.log(child);
+                }
+            })
+            object.scale.set(10,10,10);
+            mesh = object;
+            scene.add(mesh);
+
+        });
+        render();
+
+        function render() {
+            
+            stats.update();
+            var delta = clock.getDelta();
+
+            if (mesh) {
+                //   mesh.rotation.y+=0.006;
+            }
+
+            orbitControls.update(delta);
+           
+            //调用WebGLRenderer的render函数刷新场景
+            requestAnimationFrame(render);
+            webGLRenderer.render(scene, camera);
+        }
+
+
+        //初始化统计对象
+        function initStats() {
+            var stats = new Stats();
+            stats.setMode(0); // 0: 监测fps, 1: 监测渲染时间 
+            // Align top-left
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+            document.getElementById("Stats-output").appendChild(stats.domElement);
+            return stats;
+        }
+    }
+    window.onload = init;
+</script>
+</body>
+</html>

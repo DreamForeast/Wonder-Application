@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wonder.js webgl engine</title>
+
+    <script src="./engine/wd.all.innerLib.js" type="text/javascript"></script>
+    <script src="./engine/wd.all.debug.js" type="text/javascript"></script>
+</head>
+<body>
+<script>
+    window.onload = function () {
+        wd.Main.setConfig({
+            isTest: true,
+            screenSize: wd.EScreenSize.FULL
+        }).init();
+
+        wd.LoaderManager.getInstance().load([
+            {url: "./wd/untitled.wd", id: "model"},
+
+            {url: "./ui/1.jpg", id: "zoom_in"},
+            {url: "./ui/2.jpg", id: "zoom_out"},
+            {url: "./ui/3.jpg", id: "roll_left"},
+            {url: "./ui/4.jpg", id: "roll_right"},
+            {type:wd.EAssetType.SCRIPT, url: "./js/arcball.js", id: "arcball"}
+        ]).subscribe(null, null, function () {
+            initSample();
+        });
+
+        function initSample() {
+            var director = wd.Director.getInstance();
+
+            director.scene.addChild(setModel());
+            director.scene.addChild(createAmbientLight());
+            director.scene.addChild(createDirectionLight());
+            director.scene.addChild(createCamera());
+
+
+
+            director.scene.addChildren(createUI());
+
+            director.start();
+        }
+
+        function setModel() {
+            var model = wd.LoaderManager.getInstance().get("model").getChild("models").getChild(0);
+
+
+//            var newModel = wd.GameObject.create();
+
+            model.forEach(function(gameObject, index){
+                var name = gameObject.name;
+
+                material = gameObject.getComponent(wd.Geometry).material;
+                var map = material.diffuseMap;
+
+
+                if(!!map){
+                    //todo fix: fix vertex to origin point, move to pos, then use billboard!
+
+//                    var billboard = wd.Billboard.create();
+//                    billboard.mode = wd.EBillboardMode.Y;
+//
+//
+//                    gameObject.addComponent(billboard);
+                }
+
+
+                material = gameObject.getComponent(wd.Geometry).material;
+                material.shading = wd.EShading.SMOOTH;
+                material.side = wd.ESide.BOTH;
+            })
+
+            model.transform.rotate(0,180,0);
+
+            return model;
+        }
+
+        function createUI() {
+            return [
+                createImageUI("zoom_in", 100, 100, "zoom_in"),
+                createImageUI("zoom_out", 200, 100, "zoom_out"),
+                createImageUI("roll_left", 300, 100, "roll_left"),
+                createImageUI("roll_right", 400, 100, "roll_right"),
+
+            ]
+        }
+
+        function createImageUI(id, posX, posY, name){
+            var renderer = createUIRenderer();
+
+            var image = wd.Image.create();
+            image.source = wd.LoaderManager.getInstance().get(id);
+
+
+            var imageUIObject = wd.UIObject.create();
+
+            imageUIObject.addComponent(image);
+
+            imageUIObject.transform.width = 100;
+            imageUIObject.transform.height = 100;
+
+
+            imageUIObject.addComponent(renderer);
+
+
+            imageUIObject.transform.translate(posX, posY);
+
+
+            var eventTriggerDetector = wd.UIEventTriggerDetector.create();
+
+            imageUIObject.addComponent(eventTriggerDetector);
+
+            imageUIObject.name = name;
+
+
+            return imageUIObject;
+        }
+
+        function createUIRenderer(){
+            var renderer = wd.UIRenderer.create();
+
+            return renderer;
+        }
+
+        function createAmbientLight() {
+            var ambientLightComponent = wd.AmbientLight.create();
+            ambientLightComponent.color = wd.Color.create("rgb(30, 30, 30)");
+
+            var ambientLight = wd.GameObject.create();
+            ambientLight.addComponent(ambientLightComponent);
+
+            return ambientLight;
+        }
+
+        function createDirectionLight() {
+            var directionLightComponent = wd.DirectionLight.create();
+            directionLightComponent.color = wd.Color.create("#ffffff");
+            directionLightComponent.intensity = 1;
+
+            var directionLight = wd.GameObject.create();
+            directionLight.addComponent(directionLightComponent);
+
+            directionLight.transform.translate(wd.Vector3.create(0, 1000, 500));
+
+            return directionLight;
+        }
+
+        function createCamera() {
+            var camera = wd.GameObject.create(),
+                view = wd.Director.getInstance().view,
+                cameraComponent = wd.PerspectiveCamera.create();
+
+            cameraComponent.fovy = 60;
+            cameraComponent.aspect = view.width / view.height;
+            cameraComponent.near = 0.1;
+            cameraComponent.far = 10000;
+
+            var controller = wd.BasicCameraController.create(cameraComponent);
+
+            camera.addComponent(controller);
+
+
+            camera.addComponent(wd.Script.create("arcball"));
+
+            return camera;
+        }
+    };
+</script>
+</body>
+</html>
